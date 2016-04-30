@@ -1,0 +1,21 @@
+<?php
+
+class TableHash extends CWidget
+{
+	public $model;
+
+	public function run()
+	{
+		$model = $this->model;
+		$table = null;
+		$table = "<table>";
+		foreach($model as $key => $value)
+		{
+		$table .= "<tr><td>$key</td><td>$value</td></tr>";
+		}
+		$table .= "</table>";
+
+		print $table;
+	}
+}
+	

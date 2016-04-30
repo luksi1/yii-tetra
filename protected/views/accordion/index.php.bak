@@ -1,0 +1,24 @@
+<p><span id='bold'><?php echo "$befolkningsinfo->enamn, $befolkningsinfo->fnamn"; ?></span></p>
+<?php
+
+	$params = array();
+
+	$panels = array('Befolknings information' => array('model'=>$befolkningsinfo), "Muskelstatus"=>array('model'=>$muskelstatus,'hidden'=>array('personnummer')),'Patient Information'=>array('model'=>$patientinfo, 'hidden'=>array('personnummer'));)
+
+	foreach (ksort($operations) as $key => $value) {
+		array_push($panels, $key => array('model'=>$value['preoparm']));
+		array_push($panels, $key => array('model'=>$value['preophand']));
+	}
+
+	array_push($params, 'parameters' => array('heightStyle'=>'content', 'collapsible'=>'true', 'active'=>'false');
+	array_push($params, $panels);
+
+
+	$this->widget('Accordion', array (
+	'parameters' => array
+		('heightStyle'=>'content', 'collapsible'=>'true', 'active'=>'false'),
+	'panels' => array('Befolknings information' => array('model'=>$befolkningsinfo), "Muskelstatus"=>array('model'=>$muskelstatus,'hidden'=>array('personnummer')),'Patient Information'=>array('model'=>$patientinfo, 'hidden'=>array('personnummer')),
+	),
+	));
+
+?>

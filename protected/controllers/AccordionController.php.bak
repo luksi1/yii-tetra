@@ -1,0 +1,53 @@
+<?php
+
+class AccordionController extends Controller
+{
+        public $layout='//layouts/column1';
+
+	public function actionIndex()
+	{
+		$this->render('view');
+	}
+
+	public function actionDisplay()
+	{
+
+		if (isset($_GET['pnr'])) { 
+			$pnr = $_GET['pnr']; 
+		} else  {
+			throw new CHttpException(404, "The requested page cannot be found");
+		}
+
+
+		$operations = array();
+
+		$optillfallen = Optillfallen::model()->findAll('personnummer=:pnr', array(':pnr'=>$pnr));
+
+		
+		foreach ($optillfallen as $o) {
+
+			$criteria = new CDbCriteria;
+			$criteria->condition='personnummer=:personnummer AND operations_datum=:operations_datum';
+			$criteria->params = array(':personnummer'=> $o->personnummer, ':operations_datum'=> $o->operations_datum);
+
+			$aterarm = Aterarm::model()->findAll($criteria);
+			$aterhand = Aterhand::model()->findAll($criteria);
+			$preophand = Preophand::model()->find($criteria);
+			$preoparm = Preoparm::model()->find($criteria);
+
+			$operations["$o->operations_datum"] = array("aterarm"=>$aterarm,"aterhand"=>$aterhand, "preoparm"=>$preoparm, "preophand" => $preophand); 
+		} 
+
+		$information = array(
+			'befolkningsinfo' => Befolkningsinfo::model()->findByPk($pnr),
+                        'muskelstatus' => Muskelstatus::model()->findByPk($pnr),
+                        'patientinfo' => Patientinfo::model()->findByPk($pnr),
+			'operations' => $operations,
+		);
+
+
+		$this->render('index',$information);
+		
+	}
+}
+?>	

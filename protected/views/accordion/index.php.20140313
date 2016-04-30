@@ -1,0 +1,70 @@
+<p><span id='bold'><?php echo "$befolkningsinfo->enamn, $befolkningsinfo->fnamn"; ?></span></p>
+<?php
+?>
+<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+    </div>
+  </div>
+</div>
+<?php
+	$params = array();
+
+// Push some values that are static on to $panels
+	$panels = array('Befolknings information' => array('model'=>$befolkningsinfo), "Muskelstatus"=>array('model'=>$muskelstatus,'hidden'=>array('personnummer')),'Patient Information'=>array('model'=>$patientinfo, 'hidden'=>array('personnummer')));
+
+
+// Loop through everything in $operations[operations_datum) - see controller - and push them on to our $panels associative array. 
+	foreach ($operations as $key => $value) {
+
+		$preophand = (isset($value['preophand'])) ? $value['preophand'] : null;
+		$preoparm = (isset($value['preoparm'])) ? $value['preoparm'] : null;
+		$aterhand = (isset($value['aterhand'])) ? $value['aterhand'] : null;
+		$aterarm = (isset($value['aterarm'])) ? $value['aterarm'] : null;
+
+		if ($preophand && $preoparm) {
+// There shouldn't be two operations on the same day, but you never know.
+			throw CHttpException(404, "Two operations on the same day? I wasn't built to deal with that!");
+		} elseif ($preophand) {
+			$panels[$key . " - " . $preophand->optyp] = array('model' => $preophand, 'hidden' => array('personnummer'));
+
+// I hate this. But I can't seem to find a way to extract the logic to the controller. Probably exists a way, but I haven't found it.
+			foreach ($aterhand as $besok) {
+				$panels[$besok->besok_datum] = array('model' => $besok, 'hidden' => array('personnummer'), 'headerClass' => 'light');
+			}
+			
+		} elseif ($preoparm) {
+			$panels[$key . "-" . $preoparm->optyp] = array('model' => $preoparm, 'hidden' => array('personnummer'));
+
+// Same thing here. Hate it.
+			foreach ($aterhand as $besok) {
+				$panels[$besok->besok_datum] = array('model' => $besok, 'hidden' => array('personnummer'), 'headerClass' => 'light');
+			}
+		} else {
+// Every operation should have a preop entry, right?
+// Aparently I was wrong. We'll just omit this. 
+			#throw CHttpExceptions(404, "No preop operations date exists, even though there appears to be an operation on the $key");
+		}
+	}
+
+	$params['panels'] = $panels;
+
+// Define some parameters for our widget.
+	$params['parameters'] = array('heightStyle'=>'content', 'collapsible'=>'true', 'active'=>'false');
+
+// And send everything to our widget. Like i said above, this is probably too much logic for a view, but I can't seem to find a better way to dynamically build the $operations subset.
+	$this->widget('Accordion', $params);
+
+?>
